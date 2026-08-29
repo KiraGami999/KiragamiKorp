@@ -1,36 +1,97 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# KiragamiKorp — Portfolio Site
 
-## Getting Started
+The digital engineering & AI studio site for **Blessings Mandala**. A single-scroll,
+neo-brutalist / cyberpunk-inflected portfolio built with Next.js, TypeScript, Tailwind
+CSS, Framer Motion, and GSAP.
 
-First, run the development server:
+## Stack
+
+- **Next.js 16** (App Router) + **React 19** + **TypeScript** (strict mode)
+- **Tailwind CSS v4** (CSS-first theme, see `src/app/globals.css`)
+- **Framer Motion** — scroll reveals, mobile menu, magnetic buttons
+- **GSAP** + `@gsap/react` — marquee loop, pinned horizontal scroll, animated counters
+- **Lucide React** — icon set
+- Deploys to **Vercel** with zero required environment variables
+
+## Getting started
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev       # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Other scripts:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run build     # production build
+npm run start     # serve the production build
+npm run lint      # ESLint
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Project structure
 
-## Learn More
+```
+src/
+  app/                     Routes, layout, global styles, sitemap/robots
+  components/
+    layout/                Header, MobileMenu, Footer, Logo, CustomCursor
+    sections/               One file per page section (Hero, About, Work, ...)
+    ui/                     Reusable primitives (RevealText, GlitchText, ServiceRow, ...)
+  lib/
+    data/                   All editable site content lives here
+    hooks/                  useReducedMotion, useFinePointer
+    utils/                  cn() class-merging helper
+  types/                    Shared TypeScript types
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Editing content
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+All real content lives in `src/lib/data/` — no component code needs to change to update copy:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| File | What it controls |
+| --- | --- |
+| `site.ts` | Hero headline/subhead, about copy, contact copy, founder name, email, disciplines list |
+| `services.ts` | The six service rows (title, description, icon) |
+| `projects.ts` | The Work section's project cards (title, category, summary, tags, optional `href`) |
+| `stats.ts` | The animated stat counters in the About section |
+| `socials.ts` | Footer/contact social links |
+| `ai-lab.ts` | The scripted automation "Lab" terminal scenarios |
 
-## Deploy on Vercel
+All of the above ship with clearly-labeled **placeholder** content — swap it out by copying
+the shape of an existing entry.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Adding real photos
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The hero figure and founder portrait are original abstract/typographic placeholders
+(no stock photos), so there's nothing to license or attribute. To swap in a real photo:
+
+1. Add the image to `public/images/`.
+2. Replace the relevant placeholder markup (`src/components/sections/HeroFigure.tsx` or
+   the portrait block in `src/components/sections/About.tsx`) with a `next/image`.
+
+## Design system notes
+
+- **Palette**: `ink` (#0a0a0a), `acid` (#dbff3e), `paper` (#f5f4f0), `fog` (#c9c9c4) —
+  defined once in `src/app/globals.css` under `@theme inline`. No other brand colors are
+  used anywhere in the UI.
+- **Type**: `Anton` (display/headlines), `Space Grotesk` (body/UI), `JetBrains Mono`
+  (labels, counters, terminal text) — loaded via `next/font/google` in `src/app/layout.tsx`.
+- **Motion**: Framer Motion handles reveals/UI transitions; GSAP handles the marquee loop,
+  the Work section's pinned horizontal scroll, and the animated stat counters. Every
+  motion-heavy component checks `useReducedMotion()` (from `src/lib/hooks`) and either
+  disables or simplifies its animation accordingly; a global CSS rule in `globals.css`
+  also clamps any remaining CSS transitions/animations under `prefers-reduced-motion`.
+- **The AI Lab terminal** (`src/components/sections/AiLabTerminal.tsx`) is a scripted,
+  client-side simulation — not a live model call — and is labeled as such in the UI.
+
+## Deployment
+
+The site has no required environment variables and is static-friendly. To deploy on
+Vercel:
+
+```bash
+npx vercel
+```
+
+or connect the repository in the Vercel dashboard — the default Next.js build settings
+work out of the box.
