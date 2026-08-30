@@ -3,7 +3,7 @@ import { RevealLines, RevealText } from "@/components/ui/RevealText";
 import { SectionEyebrow } from "@/components/ui/SectionEyebrow";
 import { SectionDivider } from "@/components/ui/SectionDivider";
 import { ScrollLinkButton } from "@/components/ui/ScrollLinkButton";
-import { HeroFigure } from "@/components/sections/HeroFigure";
+import { SamuraiEmblem } from "@/components/sections/SamuraiEmblem";
 import { site } from "@/lib/data/site";
 
 export function Hero() {
@@ -12,10 +12,10 @@ export function Hero() {
       <section
         id="top"
         aria-label="Introduction"
-        className="relative grain-overlay bg-acid pb-28 pt-28 sm:pt-32 md:pb-40"
+        className="relative grain-overlay overflow-hidden bg-acid pb-24 pt-28 sm:pt-32 md:pb-32"
       >
-        <div className="mx-auto grid max-w-[1600px] grid-cols-1 gap-10 px-6 sm:px-10 lg:grid-cols-12 lg:px-16">
-          <div className="lg:col-span-9">
+        <div className="mx-auto grid max-w-[1600px] grid-cols-1 items-start gap-10 px-6 sm:px-10 lg:grid-cols-12 lg:gap-8 lg:px-16">
+          <div className="lg:col-span-8">
             <SectionEyebrow className="mb-6 text-ink">
               SYS.00 — {site.name.toUpperCase()}
             </SectionEyebrow>
@@ -50,11 +50,15 @@ export function Hero() {
               </p>
             </div>
           </div>
+
+          <div className="relative z-10 mx-auto w-full max-w-[280px] sm:max-w-[320px] lg:col-span-4 lg:mx-0 lg:mt-4 lg:max-w-none lg:justify-self-end">
+            <SamuraiEmblem className="w-full max-w-[360px] lg:ml-auto" />
+          </div>
         </div>
 
         <div
           aria-hidden
-          className="mt-16 hidden items-center justify-center gap-2 font-mono text-[10px] uppercase tracking-[0.3em] text-ink/60 sm:flex"
+          className="mt-14 hidden items-center justify-center gap-2 font-mono text-[10px] uppercase tracking-[0.3em] text-ink/60 sm:flex"
         >
           <span>Scroll</span>
           <ArrowDown className="h-3 w-3 animate-bounce motion-reduce:animate-none" />
@@ -62,12 +66,6 @@ export function Hero() {
       </section>
 
       <SectionDivider from="var(--color-acid)" to="var(--color-ink)" />
-
-      <div className="pointer-events-none absolute inset-x-0 bottom-[-12%] z-20 hidden justify-end px-6 sm:px-10 md:flex lg:px-16">
-        <div className="w-[34%] max-w-xs">
-          <HeroFigure />
-        </div>
-      </div>
     </div>
   );
 }
