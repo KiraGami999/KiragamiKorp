@@ -94,7 +94,18 @@ There is **no public login link**. Entry is hidden behind the hero samurai mark:
 1. Click the samurai image → cyberpunk terminal
 2. Enter clearance phrase (stored hashed in Neon `auth_config`; default seed: `Screw Arasaka`)
 3. Personal login at `/admin/login` (credentials in Neon `admin_users`)
-4. Ops deck at `/admin` — edit projects, site copy, and stats
+4. Ops deck at `/admin`
+
+| Section | What it does |
+| --- | --- |
+| Overview | Counts, content gaps (missing covers, write-ups, alt text), quick links |
+| Selected work | Project editor: cover + gallery uploads, stack chips, role, live/repo links, long-form case study, draft/published, reorder, live card preview |
+| Site copy / Stats | Hero, about, contact copy and the numbers strip |
+| Studio | Live AI on/off, model, temperature, per-visitor rate limit, house rules, generation log |
+| Security | Password (signs out other devices), username/display name, clearance phrase, active sessions |
+| System | Database, storage, session secret, AI provider test, failed logins, audit log |
+
+Content edits share one **Save & publish** bar (Ctrl+S). Images are resized to 2000px WebP in the browser, stored in `media_assets`, and served from `/api/media/<id>`. Each published project gets a case-study page at `/work/<id>`.
 
 ### Neon database
 
@@ -104,12 +115,15 @@ Project: **kiragamikorp** · Database: **`kiragamikorp`** (not `neondb`)
 | --- | --- |
 | `admin_users` | Sole-admin username + scrypt password hash |
 | `auth_config` | Hashed gate phrase |
-| `admin_sessions` | Session registry (logout / expiry) |
+| `admin_sessions` | Session registry, checked on every admin request (revocation is immediate) |
+| `admin_audit_log` | Logins, failed logins, saves, credential changes |
+| `media_assets` | Uploaded project images (bytea) |
+| `app_settings` | Studio generator controls (key `studio`) |
 | `site_settings` | Hero / about / contact / disciplines JSON |
 | `projects` | Portfolio projects (normalized rows) |
 | `site_stats` | About counters |
 | `site_content` | Legacy JSON blob mirror |
-| `automation_workflows` | Studio generation archive (ready for use) |
+| `automation_workflows` | Studio generation log |
 
 Seed locally: `node scripts/seed-db.mjs`  
 Schema reference: `scripts/schema.sql`

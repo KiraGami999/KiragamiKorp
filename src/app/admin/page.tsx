@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { AdminDashboard } from "@/components/admin/AdminDashboard";
+import { AdminShell } from "@/components/admin/AdminShell";
 import { requireAdminSession } from "@/lib/admin/auth";
 import { getSiteContent } from "@/lib/content/store";
 
@@ -15,11 +15,14 @@ export default async function AdminPage() {
     redirect("/");
   }
 
-  const content = await getSiteContent();
+  const content = await getSiteContent({ includeDrafts: true });
 
   return (
-    <main className="min-h-screen bg-paper text-ink">
-      <AdminDashboard initialContent={content} username={session.username} />
-    </main>
+    <AdminShell
+      initialContent={content}
+      username={session.username}
+      displayName={session.displayName}
+      hasDatabaseAdmin={session.adminUserId !== null}
+    />
   );
 }

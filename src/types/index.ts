@@ -15,15 +15,33 @@ export interface Service {
 
 export type ProjectCategory = "Mobile" | "Web" | "AI & Automation";
 
+export interface ProjectImage {
+  id: string;
+  alt: string;
+  width?: number;
+  height?: number;
+}
+
 export interface Project {
   id: string;
   index: string;
   title: string;
   category: ProjectCategory;
   year: string;
+  /** Short card copy shown in the Selected Work rail. */
   summary: string;
+  /** Technologies / languages. */
   tags: string[];
+  /** Live URL. */
   href?: string;
+  /** Long-form case study copy; blank lines separate paragraphs. */
+  description?: string;
+  role?: string;
+  repoUrl?: string;
+  /** First image is the cover. */
+  images?: ProjectImage[];
+  /** Drafts are saved but hidden from the public site. */
+  published?: boolean;
 }
 
 export interface Stat {

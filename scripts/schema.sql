@@ -49,6 +49,10 @@ CREATE TABLE IF NOT EXISTS projects (
   summary TEXT NOT NULL DEFAULT '',
   tags JSONB NOT NULL DEFAULT '[]'::jsonb,
   href TEXT,
+  description TEXT NOT NULL DEFAULT '',
+  role TEXT,
+  repo_url TEXT,
+  images JSONB NOT NULL DEFAULT '[]'::jsonb,
   sort_order INT NOT NULL DEFAULT 0,
   published BOOLEAN NOT NULL DEFAULT true,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -84,3 +88,40 @@ CREATE TABLE IF NOT EXISTS automation_workflows (
 );
 
 CREATE INDEX IF NOT EXISTS automation_workflows_created_idx ON automation_workflows (created_at DESC);
+
+-- Existing databases created before the admin panel rebuild:
+ALTER TABLE projects ADD COLUMN IF NOT EXISTS description TEXT NOT NULL DEFAULT '';
+ALTER TABLE projects ADD COLUMN IF NOT EXISTS role TEXT;
+ALTER TABLE projects ADD COLUMN IF NOT EXISTS repo_url TEXT;
+ALTER TABLE projects ADD COLUMN IF NOT EXISTS images JSONB NOT NULL DEFAULT '[]'::jsonb;
+
+-- Project images, served from /api/media/<id>.
+CREATE TABLE IF NOT EXISTS media_assets (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  mime_type TEXT NOT NULL,
+  bytes BYTEA NOT NULL,
+  size_bytes INT NOT NULL,
+  width INT,
+  height INT,
+  original_name TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS media_assets_created_idx ON media_assets (created_at DESC);
+
+-- Key/value settings (e.g. key 'studio' for the automation generator controls).
+CREATE TABLE IF NOT EXISTS app_settings (
+  key TEXT PRIMARY KEY,
+  value JSONB NOT NULL,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS admin_audit_log (
+  id BIGSERIAL PRIMARY KEY,
+  action TEXT NOT NULL,
+  detail JSONB NOT NULL DEFAULT '{}'::jsonb,
+  ip_address TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS admin_audit_log_created_idx ON admin_audit_log (created_at DESC);

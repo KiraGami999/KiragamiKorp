@@ -13,26 +13,53 @@ const STEP_TYPES: readonly AutomationStepType[] = [
   "review",
 ];
 
-interface LlmConfig {
+export interface LlmConfig {
   baseUrl: string;
   apiKey: string;
   model: string;
 }
 
+export interface LlmOptions {
+  temperature?: number;
+  extraInstructions?: string;
+}
+
 /**
  * Reads provider settings from the environment. Any OpenAI-compatible
  * endpoint works (Groq by default, Ollama or OpenRouter by changing
- * LLM_BASE_URL/LLM_MODEL). Returns null when no key is configured.
+ * LLM_BASE_URL/LLM_MODEL). A non-empty `modelOverride` (set in the admin
+ * Studio panel) wins over LLM_MODEL. Returns null when no key is configured.
  */
-export function getLlmConfig(): LlmConfig | null {
+export function getLlmConfig(modelOverride?: string): LlmConfig | null {
   const apiKey = process.env.LLM_API_KEY ?? process.env.GROQ_API_KEY;
   if (!apiKey) return null;
 
   return {
     baseUrl: (process.env.LLM_BASE_URL ?? DEFAULT_BASE_URL).replace(/\/+$/, ""),
     apiKey,
-    model: process.env.LLM_MODEL ?? DEFAULT_MODEL,
+    model: modelOverride || process.env.LLM_MODEL || DEFAULT_MODEL,
   };
+}
+
+/** Cheap reachability/auth check against the provider's model list. */
+export async function pingLlm(config: LlmConfig): Promise<{ ok: boolean; status: number; latencyMs: number; modelAvailable: boolean | null }> {
+  const started = Date.now();
+  try {
+    const response = await fetch(`${config.baseUrl}/models`, {
+      headers: { Authorization: `Bearer ${config.apiKey}` },
+      signal: AbortSignal.timeout(10_000),
+    });
+    let modelAvailable: boolean | null = null;
+    if (response.ok) {
+      const data: unknown = await response.json();
+      if (isRecord(data) && Array.isArray(data.data)) {
+        modelAvailable = data.data.some((entry) => isRecord(entry) && entry.id === config.model);
+      }
+    }
+    return { ok: response.ok, status: response.status, latencyMs: Date.now() - started, modelAvailable };
+  } catch {
+    return { ok: false, status: 0, latencyMs: Date.now() - started, modelAvailable: null };
+  }
 }
 
 const SYSTEM_PROMPT = `You are the automation architect inside KiragamiKorp Studio.
@@ -158,7 +185,14 @@ export class LlmError extends Error {
   }
 }
 
-export async function generateWithLlm(prompt: string, config: LlmConfig): Promise<AutomationWorkflow> {
+export async function generateWithLlm(
+  prompt: string,
+  config: LlmConfig,
+  options: LlmOptions = {},
+): Promise<AutomationWorkflow> {
+  const extra = options.extraInstructions?.trim();
+  const systemPrompt = extra ? `${SYSTEM_PROMPT}\n\nAdditional studio rules:\n${extra}` : SYSTEM_PROMPT;
+
   let response: Response;
   try {
     response = await fetch(`${config.baseUrl}/chat/completions`, {
@@ -169,13 +203,13 @@ export async function generateWithLlm(prompt: string, config: LlmConfig): Promis
       },
       body: JSON.stringify({
         model: config.model,
-        temperature: 0.4,
+        temperature: options.temperature ?? 0.4,
         max_tokens: 4096,
         response_format: { type: "json_object" },
         // GPT-OSS models think before answering; keep that short so tokens go to the JSON.
         ...(config.model.includes("gpt-oss") ? { reasoning_effort: "low" } : {}),
         messages: [
-          { role: "system", content: SYSTEM_PROMPT },
+          { role: "system", content: systemPrompt },
           { role: "user", content: prompt },
         ],
       }),

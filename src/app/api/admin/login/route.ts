@@ -10,6 +10,7 @@ import {
   verifyAdminCredentials,
   verifyGateToken,
 } from "@/lib/admin/auth";
+import { logAudit } from "@/lib/admin/audit";
 import { createAdminSession } from "@/lib/admin/db-auth";
 import { checkRateLimit, getClientKey } from "@/lib/automation/rate-limit";
 
@@ -49,8 +50,10 @@ export async function POST(request: Request) {
   const username = typeof body.username === "string" ? body.username.trim() : "";
   const password = typeof body.password === "string" ? body.password : "";
 
+  const ip = getClientKey(request);
   const admin = await verifyAdminCredentials(username, password);
   if (!admin) {
+    await logAudit("login_failed", { username: username.slice(0, 60) }, ip);
     return NextResponse.json({ error: "Invalid credentials." }, { status: 401 });
   }
 
@@ -62,12 +65,14 @@ export async function POST(request: Request) {
         token,
         expiresAt: new Date(Date.now() + SESSION_MAX_AGE * 1000),
         userAgent: request.headers.get("user-agent"),
-        ipAddress: getClientKey(request),
+        ipAddress: ip,
       });
     } catch (error) {
       console.error("[admin/login] session persist failed:", error);
+      return NextResponse.json({ error: "Could not start a session. Try again." }, { status: 500 });
     }
   }
+  await logAudit("login", { username: admin.username }, ip);
 
   const response = NextResponse.json({ ok: true, redirect: "/admin" });
   response.cookies.set(SESSION_COOKIE, token, cookieOptions.session);

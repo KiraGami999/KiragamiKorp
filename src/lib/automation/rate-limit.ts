@@ -1,5 +1,5 @@
 const WINDOW_MS = 60_000;
-const MAX_REQUESTS = 5;
+const DEFAULT_MAX_REQUESTS = 5;
 
 const hits = new Map<string, number[]>();
 
@@ -8,11 +8,14 @@ const hits = new Map<string, number[]>();
  * hosts each instance keeps its own count — enough to stop casual abuse
  * of a free-tier key, not a hard global quota.
  */
-export function checkRateLimit(key: string): { allowed: boolean; retryAfterSeconds: number } {
+export function checkRateLimit(
+  key: string,
+  maxRequests: number = DEFAULT_MAX_REQUESTS,
+): { allowed: boolean; retryAfterSeconds: number } {
   const now = Date.now();
   const recent = (hits.get(key) ?? []).filter((time) => now - time < WINDOW_MS);
 
-  if (recent.length >= MAX_REQUESTS) {
+  if (recent.length >= maxRequests) {
     const retryAfterSeconds = Math.ceil((WINDOW_MS - (now - recent[0])) / 1000);
     hits.set(key, recent);
     return { allowed: false, retryAfterSeconds };
