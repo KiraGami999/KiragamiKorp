@@ -14,14 +14,18 @@ interface RevealTextProps {
   delay?: number;
   stagger?: number;
   once?: boolean;
+  /**
+   * `mount` — animate in as soon as the component mounts (hero / above-the-fold).
+   * `view` — animate when scrolled into view (below-the-fold sections).
+   */
+  trigger?: "mount" | "view";
 }
 
 type Lines = string[] | readonly string[];
 
 /**
- * Splits text into words and reveals them with a masked upward stagger on
- * scroll-into-view. Falls back to a plain static render when the user
- * prefers reduced motion.
+ * Splits text into words and reveals them with a masked upward stagger.
+ * Falls back to a plain static render when the user prefers reduced motion.
  */
 export function RevealText({
   text,
@@ -30,6 +34,7 @@ export function RevealText({
   delay = 0,
   stagger = 0.06,
   once = true,
+  trigger = "view",
 }: RevealTextProps) {
   const reducedMotion = useReducedMotion();
   const words = text.split(" ");
@@ -46,8 +51,14 @@ export function RevealText({
             <motion.span
               className="inline-block will-change-transform"
               initial={{ y: "110%" }}
-              whileInView={{ y: "0%" }}
-              viewport={{ once, margin: "-10% 0px -10% 0px" }}
+              {...(trigger === "mount"
+                ? { animate: { y: "0%" } }
+                : {
+                    whileInView: { y: "0%" },
+                    // No negative top margin — that prevented hero text from
+                    // ever counting as "in view" and left it permanently clipped.
+                    viewport: { once, amount: 0.15 },
+                  })}
               transition={{
                 duration: 0.75,
                 delay: delay + index * stagger,
@@ -71,6 +82,7 @@ export function RevealLines({
   lineClassName,
   delay = 0,
   id,
+  trigger = "view",
 }: {
   lines: Lines;
   as?: RevealTag;
@@ -78,6 +90,7 @@ export function RevealLines({
   lineClassName?: string;
   delay?: number;
   id?: string;
+  trigger?: "mount" | "view";
 }) {
   return (
     <Tag id={id} className={cn("flex flex-col", className)}>
@@ -88,6 +101,7 @@ export function RevealLines({
           as="span"
           className={lineClassName}
           delay={delay + index * 0.08}
+          trigger={trigger}
         />
       ))}
     </Tag>

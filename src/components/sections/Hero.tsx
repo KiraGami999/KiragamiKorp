@@ -24,6 +24,7 @@ export function Hero() {
             <RevealLines
               lines={site.heroHeadline}
               as="h1"
+              trigger="mount"
               lineClassName="font-display text-ink text-[13vw] leading-[0.86] tracking-tight sm:text-[9vw] lg:text-[6.4vw]"
             />
 
@@ -32,6 +33,7 @@ export function Hero() {
               <RevealText
                 text={site.heroSubhead}
                 as="p"
+                trigger="mount"
                 delay={0.4}
                 stagger={0.012}
                 className="font-mono text-xs uppercase leading-relaxed tracking-widest text-ink/80 sm:text-sm"
