@@ -9,10 +9,12 @@ export function StudioApp() {
   const [workflow, setWorkflow] = useState<AutomationWorkflow | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
 
   async function handleGenerate(prompt: string) {
     setIsGenerating(true);
     setError(null);
+    setNotice(null);
 
     try {
       const response = await fetch("/api/generate-automation", {
@@ -28,6 +30,7 @@ export function StudioApp() {
       }
 
       setWorkflow(data.workflow);
+      setNotice(data.notice ?? null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
@@ -48,8 +51,7 @@ export function StudioApp() {
         </h1>
         <p className="mt-6 max-w-md text-base leading-relaxed text-ink/70">
           Plain-language brief in. Structured automation workflow out — steps, system prompt,
-          and starter code. MVP uses a mock generator; the API shape is ready for a live local
-          LLM later.
+          and starter code, built live by an open-source model on Groq.
         </p>
 
         <div className="mt-8 border-2 border-ink bg-paper p-5 sm:p-6">
@@ -57,6 +59,11 @@ export function StudioApp() {
           {error ? (
             <p role="alert" className="mt-4 border-l-2 border-ink bg-ink/5 px-3 py-2 font-mono text-xs text-ink">
               {error}
+            </p>
+          ) : null}
+          {notice ? (
+            <p role="status" className="mt-4 border-l-2 border-acid bg-ink px-3 py-2 font-mono text-xs text-paper">
+              {notice}
             </p>
           ) : null}
           {isGenerating ? (
@@ -84,7 +91,7 @@ export function StudioApp() {
               </p>
             </div>
             <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-paper/35">
-              Mode: mock · local-first architecture
+              Powered by Groq · template fallback
             </p>
           </div>
         )}

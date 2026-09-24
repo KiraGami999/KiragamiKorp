@@ -54,7 +54,8 @@ export function WorkflowResult({ workflow }: { workflow: AutomationWorkflow }) {
       <header className="flex flex-col gap-4 border-b-2 border-ink bg-ink px-5 py-5 text-paper sm:flex-row sm:items-start sm:justify-between sm:px-7">
         <div>
           <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-acid">
-            {workflow.category} · {workflow.mode === "mock" ? "Mock generator" : "Live"}
+            {workflow.category} ·{" "}
+            {workflow.mode === "live" ? `Live · ${workflow.model ?? "AI"}` : "Template"}
           </p>
           <h2 className="mt-2 font-display text-3xl uppercase leading-none tracking-tight sm:text-4xl">
             {workflow.title}

@@ -87,6 +87,7 @@ export interface AutomationWorkflow {
   estimatedTimeSaved: string;
   generatedAt: string;
   mode: "mock" | "live";
+  model?: string;
 }
 
 export interface GenerateAutomationRequest {
@@ -95,4 +96,6 @@ export interface GenerateAutomationRequest {
 
 export interface GenerateAutomationResponse {
   workflow: AutomationWorkflow;
+  /** Set when live generation was skipped or failed and the template fallback was used. */
+  notice?: string;
 }

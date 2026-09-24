@@ -41,8 +41,8 @@ export default function StudioPage() {
       </main>
       <footer className="border-t-2 border-ink bg-ink py-6 text-paper">
         <div className="mx-auto flex max-w-[1600px] flex-col gap-2 px-6 font-mono text-[11px] uppercase tracking-[0.2em] text-paper/45 sm:flex-row sm:items-center sm:justify-between sm:px-10 lg:px-16">
-          <p>KiragamiKorp Studio · MVP mock generator</p>
-          <p>Swap in a live LLM via /api/generate-automation</p>
+          <p>KiragamiKorp Studio · Live generation via Groq</p>
+          <p>Template fallback when the AI is unavailable</p>
         </div>
       </footer>
     </>
