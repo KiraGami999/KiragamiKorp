@@ -92,11 +92,29 @@ All portfolio copy lives in `src/lib/data/`:
 There is **no public login link**. Entry is hidden behind the hero samurai mark:
 
 1. Click the samurai image → cyberpunk terminal
-2. Enter clearance phrase: `Screw Arasaka` (override with `GATE_PHRASE`)
-3. Personal login at `/admin/login` using `ADMIN_USERNAME` / `ADMIN_PASSWORD`
-4. Ops deck at `/admin` — edit projects, site copy, and stats; saved to Neon
+2. Enter clearance phrase (stored hashed in Neon `auth_config`; default seed: `Screw Arasaka`)
+3. Personal login at `/admin/login` (credentials in Neon `admin_users`)
+4. Ops deck at `/admin` — edit projects, site copy, and stats
 
-Required env vars: `DATABASE_URL`, `ADMIN_USERNAME`, `ADMIN_PASSWORD`, `ADMIN_SESSION_SECRET`.
+### Neon database
+
+Project: **kiragamikorp** · Database: **`kiragamikorp`** (not `neondb`)
+
+| Table | Purpose |
+| --- | --- |
+| `admin_users` | Sole-admin username + scrypt password hash |
+| `auth_config` | Hashed gate phrase |
+| `admin_sessions` | Session registry (logout / expiry) |
+| `site_settings` | Hero / about / contact / disciplines JSON |
+| `projects` | Portfolio projects (normalized rows) |
+| `site_stats` | About counters |
+| `site_content` | Legacy JSON blob mirror |
+| `automation_workflows` | Studio generation archive (ready for use) |
+
+Seed locally: `node scripts/seed-db.mjs`  
+Schema reference: `scripts/schema.sql`
+
+Required Vercel env: `DATABASE_URL` (must end with `/kiragamikorp`), `ADMIN_SESSION_SECRET`. Optional: `GROQ_API_KEY`.
 
 ## Design system notes
 
@@ -108,7 +126,8 @@ Required env vars: `DATABASE_URL`, `ADMIN_USERNAME`, `ADMIN_PASSWORD`, `ADMIN_SE
 
 Connect the repo in Vercel — default Next.js settings work. Add these environment variables for full features:
 
+- `DATABASE_URL` — Neon connection string for database **`kiragamikorp`**
+- `ADMIN_SESSION_SECRET` — random string for signing admin cookies
 - `GROQ_API_KEY` — live Studio generation (optional; templates otherwise)
-- `DATABASE_URL` — Neon Postgres for CMS content
-- `ADMIN_USERNAME` / `ADMIN_PASSWORD` / `ADMIN_SESSION_SECRET` — sole admin login
-- `GATE_PHRASE` — optional; defaults to `Screw Arasaka`
+
+Admin username/password and the gate phrase live in Postgres after seeding (not required as Vercel env vars).

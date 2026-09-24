@@ -1,8 +1,8 @@
 export const GATE_COOKIE = "kk_gate";
 export const SESSION_COOKIE = "kk_session";
 
-const GATE_MAX_AGE = 60 * 60; // 1 hour to complete login
-const SESSION_MAX_AGE = 60 * 60 * 24 * 14; // 14 days
+export const GATE_MAX_AGE = 60 * 60; // 1 hour to complete login
+export const SESSION_MAX_AGE = 60 * 60 * 24 * 14; // 14 days
 
 function getSecret(): string {
   return process.env.ADMIN_SESSION_SECRET ?? process.env.GROQ_API_KEY ?? "kiragamikorp-dev-secret";
@@ -40,7 +40,8 @@ function safeEqual(a: string, b: string): boolean {
   return mismatch === 0;
 }
 
-export function verifyGatePhrase(input: string): boolean {
+/** Env fallback only — prefer DB via verifyGateAgainstDatabase. */
+export function verifyGatePhraseEnv(input: string): boolean {
   return safeEqual(input.trim(), getGatePhrase());
 }
 
@@ -87,15 +88,16 @@ export async function verifySessionToken(
   return { username };
 }
 
-export function verifyAdminCredentials(username: string, password: string): boolean {
+/** Env fallback only — prefer DB via verifyAdminAgainstDatabase. */
+export function verifyAdminCredentialsEnv(username: string, password: string): boolean {
   const expectedUser = process.env.ADMIN_USERNAME;
   const expectedPass = process.env.ADMIN_PASSWORD;
   if (!expectedUser || !expectedPass) return false;
   return safeEqual(username, expectedUser) && safeEqual(password, expectedPass);
 }
 
-export function isAdminConfigured(): boolean {
-  return Boolean(process.env.ADMIN_USERNAME && process.env.ADMIN_PASSWORD && process.env.DATABASE_URL);
+export function isEnvAdminConfigured(): boolean {
+  return Boolean(process.env.ADMIN_USERNAME && process.env.ADMIN_PASSWORD);
 }
 
 export const cookieOptions = {

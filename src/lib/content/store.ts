@@ -1,15 +1,9 @@
-import { neon } from "@neondatabase/serverless";
 import { getDefaultContent } from "@/lib/content/defaults";
+import { getSql, requireSql } from "@/lib/db";
 import type { EditableSite, SiteContent, SiteContentRecord } from "@/types/content";
 import type { Project, ProjectCategory, Stat } from "@/types";
 
 const CATEGORIES: readonly ProjectCategory[] = ["Mobile", "Web", "AI & Automation"];
-
-function getSql() {
-  const url = process.env.DATABASE_URL;
-  if (!url) return null;
-  return neon(url);
-}
 
 function asString(value: unknown, fallback = ""): string {
   return typeof value === "string" ? value : fallback;
@@ -24,7 +18,6 @@ function normalizeSite(raw: unknown): EditableSite {
   const defaults = getDefaultContent().site;
   if (!raw || typeof raw !== "object") return defaults;
   const data = raw as Record<string, unknown>;
-
   const disciplinesRaw = Array.isArray(data.disciplines) ? data.disciplines : defaults.disciplines;
 
   return {
@@ -74,10 +67,11 @@ function normalizeProjects(raw: unknown): Project[] {
 
       const category = CATEGORIES.find((entry) => entry === row.category) ?? "Web";
       const href = asString(row.href);
+      const indexLabel = asString(row.index ?? row.index_label, String(index + 1).padStart(2, "0"));
 
       return {
         id: asString(row.id, `project-${index + 1}`),
-        index: asString(row.index, String(index + 1).padStart(2, "0")),
+        index: indexLabel,
         title,
         category,
         year: asString(row.year, String(new Date().getFullYear())),
@@ -116,37 +110,84 @@ export function normalizeContent(raw: SiteContent): SiteContent {
   };
 }
 
-export async function getSiteContent(): Promise<SiteContentRecord> {
-  const defaults = getDefaultContent();
+async function readNormalizedTables(): Promise<SiteContentRecord | null> {
   const sql = getSql();
+  if (!sql) return null;
 
-  if (!sql) {
-    return { ...defaults, updatedAt: new Date(0).toISOString() };
+  const [settingsRows, projectRows, statRows] = await Promise.all([
+    sql`SELECT data, updated_at FROM site_settings WHERE id = 'default' LIMIT 1`,
+    sql`
+      SELECT id, index_label, title, category, year, summary, tags, href
+      FROM projects
+      WHERE published = true
+      ORDER BY sort_order ASC, created_at ASC
+    `,
+    sql`SELECT id, value, label FROM site_stats ORDER BY sort_order ASC`,
+  ]);
+
+  const settings = settingsRows[0] as { data: unknown; updated_at: string } | undefined;
+  if (!settings && projectRows.length === 0 && statRows.length === 0) {
+    return null;
   }
 
+  const projects = normalizeProjects(
+    projectRows.map((row) => {
+      const item = row as {
+        id: string;
+        index_label: string;
+        title: string;
+        category: string;
+        year: string;
+        summary: string;
+        tags: unknown;
+        href: string | null;
+      };
+      return {
+        id: item.id,
+        index: item.index_label,
+        title: item.title,
+        category: item.category,
+        year: item.year,
+        summary: item.summary,
+        tags: item.tags,
+        href: item.href ?? undefined,
+      };
+    }),
+  );
+
+  return {
+    site: normalizeSite(settings?.data),
+    projects,
+    stats: normalizeStats(statRows),
+    updatedAt: settings?.updated_at
+      ? new Date(settings.updated_at).toISOString()
+      : new Date().toISOString(),
+  };
+}
+
+export async function getSiteContent(): Promise<SiteContentRecord> {
+  const defaults = getDefaultContent();
+
   try {
+    const normalized = await readNormalizedTables();
+    if (normalized) return normalized;
+
+    // Fallback to legacy blob table if normalized tables are empty.
+    const sql = getSql();
+    if (!sql) return { ...defaults, updatedAt: new Date(0).toISOString() };
+
     const rows = await sql`
       SELECT site, projects, stats, updated_at
       FROM site_content
       WHERE id = 'default'
       LIMIT 1
     `;
-
     const row = rows[0] as
       | { site: unknown; projects: unknown; stats: unknown; updated_at: string }
       | undefined;
 
     if (!row) {
-      await sql`
-        INSERT INTO site_content (id, site, projects, stats)
-        VALUES (
-          'default',
-          ${JSON.stringify(defaults.site)}::jsonb,
-          ${JSON.stringify(defaults.projects)}::jsonb,
-          ${JSON.stringify(defaults.stats)}::jsonb
-        )
-        ON CONFLICT (id) DO NOTHING
-      `;
+      await saveSiteContent(defaults);
       return { ...defaults, updatedAt: new Date().toISOString() };
     }
 
@@ -163,12 +204,50 @@ export async function getSiteContent(): Promise<SiteContentRecord> {
 }
 
 export async function saveSiteContent(content: SiteContent): Promise<SiteContentRecord> {
-  const sql = getSql();
-  if (!sql) {
-    throw new Error("DATABASE_URL is not configured.");
+  const sql = requireSql();
+  const normalized = normalizeContent(content);
+
+  await sql`
+    INSERT INTO site_settings (id, data, updated_at)
+    VALUES ('default', ${JSON.stringify(normalized.site)}::jsonb, now())
+    ON CONFLICT (id) DO UPDATE SET
+      data = EXCLUDED.data,
+      updated_at = now()
+  `;
+
+  await sql`DELETE FROM projects`;
+  for (let i = 0; i < normalized.projects.length; i += 1) {
+    const project = normalized.projects[i];
+    await sql`
+      INSERT INTO projects (
+        id, index_label, title, category, year, summary, tags, href, sort_order, published, updated_at
+      )
+      VALUES (
+        ${project.id},
+        ${project.index},
+        ${project.title},
+        ${project.category},
+        ${project.year},
+        ${project.summary},
+        ${JSON.stringify(project.tags)}::jsonb,
+        ${project.href ?? null},
+        ${i},
+        true,
+        now()
+      )
+    `;
   }
 
-  const normalized = normalizeContent(content);
+  await sql`DELETE FROM site_stats`;
+  for (let i = 0; i < normalized.stats.length; i += 1) {
+    const stat = normalized.stats[i];
+    await sql`
+      INSERT INTO site_stats (id, value, label, sort_order)
+      VALUES (${stat.id}, ${stat.value}, ${stat.label}, ${i})
+    `;
+  }
+
+  // Keep legacy blob in sync for rollback / tooling.
   const rows = await sql`
     INSERT INTO site_content (id, site, projects, stats, updated_at)
     VALUES (

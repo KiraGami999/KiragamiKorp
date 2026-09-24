@@ -26,7 +26,7 @@ export async function POST(request: Request) {
   }
 
   const code = typeof body.code === "string" ? body.code : "";
-  if (!verifyGatePhrase(code)) {
+  if (!(await verifyGatePhrase(code))) {
     return NextResponse.json({ error: "ACCESS DENIED" }, { status: 401 });
   }
 
