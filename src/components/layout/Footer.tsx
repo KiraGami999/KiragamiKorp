@@ -1,10 +1,12 @@
 import { ArrowUp } from "lucide-react";
+import Link from "next/link";
 import { site } from "@/lib/data/site";
 
 const sitemap = [
   { href: "#work", label: "Work" },
   { href: "#services", label: "Services" },
   { href: "#lab", label: "Lab" },
+  { href: "/studio", label: "Studio" },
   { href: "#about", label: "About" },
   { href: "#contact", label: "Contact" },
 ];
@@ -19,9 +21,15 @@ export function Footer() {
           <ul className="flex flex-wrap gap-x-6 gap-y-2 font-mono text-xs uppercase tracking-[0.2em] text-paper/60">
             {sitemap.map((link) => (
               <li key={link.href}>
-                <a href={link.href} className="hover:text-acid">
-                  {link.label}
-                </a>
+                {link.href.startsWith("/") ? (
+                  <Link href={link.href} className="hover:text-acid">
+                    {link.label}
+                  </Link>
+                ) : (
+                  <a href={link.href} className="hover:text-acid">
+                    {link.label}
+                  </a>
+                )}
               </li>
             ))}
           </ul>

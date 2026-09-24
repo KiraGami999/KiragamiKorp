@@ -1,4 +1,5 @@
 import { ArrowDown, ArrowUpRight } from "lucide-react";
+import Link from "next/link";
 import { RevealLines, RevealText } from "@/components/ui/RevealText";
 import { SectionEyebrow } from "@/components/ui/SectionEyebrow";
 import { SectionDivider } from "@/components/ui/SectionDivider";
@@ -37,13 +38,19 @@ export function Hero() {
               />
             </div>
 
-            <div className="mt-12 flex flex-wrap items-center gap-6 lg:mt-16">
+            <div className="mt-12 flex flex-wrap items-center gap-4 lg:mt-16">
               <ScrollLinkButton
                 target="work"
                 className="border-2 border-ink bg-ink px-7 py-4 font-mono text-xs font-semibold uppercase tracking-[0.2em] text-acid transition-colors hover:bg-transparent hover:text-ink"
               >
                 See the work
               </ScrollLinkButton>
+              <Link
+                href="/studio"
+                className="border-2 border-ink px-7 py-4 font-mono text-xs font-semibold uppercase tracking-[0.2em] text-ink transition-colors hover:bg-ink hover:text-acid"
+              >
+                Open Studio
+              </Link>
               <p className="font-mono text-xs uppercase tracking-[0.2em] text-ink/70">
                 {site.founder}
                 <span className="block text-ink/50">Founder &amp; Lead Engineer</span>

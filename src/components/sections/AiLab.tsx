@@ -1,3 +1,5 @@
+import Link from "next/link";
+import { ArrowUpRight } from "lucide-react";
 import { SectionEyebrow } from "@/components/ui/SectionEyebrow";
 import { RevealLines, RevealText } from "@/components/ui/RevealText";
 import { AiLabTerminal } from "@/components/sections/AiLabTerminal";
@@ -16,14 +18,22 @@ export function AiLab() {
             lineClassName="font-display text-ink text-[13vw] leading-[0.9] sm:text-[6vw] lg:text-[3.6vw]"
           />
           <RevealText
-            text="A simulated preview of the automation pipelines built for clients — local-first, prompt-engineered, and wired into real workflows. Not a live model call, just a look at the shape of the work."
+            text="Preview the shape of a pipeline — then open Studio and generate a full workflow from a plain-language brief."
             as="p"
             delay={0.3}
             className="mt-6 max-w-md text-base leading-relaxed text-ink/75"
           />
 
+          <Link
+            href="/studio"
+            className="mt-8 inline-flex items-center gap-2 border-2 border-ink bg-ink px-6 py-3 font-mono text-xs font-semibold uppercase tracking-[0.2em] text-acid transition-colors hover:bg-transparent hover:text-ink"
+          >
+            Open Studio
+            <ArrowUpRight className="h-4 w-4" aria-hidden />
+          </Link>
+
           <p className="mt-6 font-mono text-[11px] uppercase tracking-[0.25em] text-ink/50">
-            Simulated workflow preview
+            Simulated preview · generate for real in Studio
           </p>
 
           <ul className="sr-only">

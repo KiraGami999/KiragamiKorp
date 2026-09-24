@@ -1,8 +1,7 @@
-# KiragamiKorp — Portfolio Site
+# KiragamiKorp — Portfolio + Automation Studio
 
-The digital engineering & AI studio site for **Blessings Mandala**. A single-scroll,
-neo-brutalist / cyberpunk-inflected portfolio built with Next.js, TypeScript, Tailwind
-CSS, Framer Motion, and GSAP.
+The digital engineering & AI studio site for **Blessings Mandala**. A neo-brutalist /
+cyberpunk-inflected portfolio **plus** an MVP AI automation generation system at `/studio`.
 
 ## Stack
 
@@ -11,7 +10,7 @@ CSS, Framer Motion, and GSAP.
 - **Framer Motion** — scroll reveals, mobile menu, magnetic buttons
 - **GSAP** + `@gsap/react` — marquee loop, pinned horizontal scroll, animated counters
 - **Lucide React** — icon set
-- Deploys to **Vercel** with zero required environment variables
+- Deploys to **Vercel** with zero required environment variables (mock generator)
 
 ## Getting started
 
@@ -19,6 +18,9 @@ CSS, Framer Motion, and GSAP.
 npm install
 npm run dev       # http://localhost:3000
 ```
+
+- Portfolio: http://localhost:3000
+- Studio: http://localhost:3000/studio
 
 Other scripts:
 
@@ -28,70 +30,61 @@ npm run start     # serve the production build
 npm run lint      # ESLint
 ```
 
+## Studio (MVP)
+
+Describe a task in plain language → get a structured automation workflow:
+
+- Pipeline **steps** (trigger → ingest → AI → review → action)
+- **System prompt**
+- Starter **code** stub
+- **Export JSON**
+
+| Path | Role |
+| --- | --- |
+| `src/app/studio/page.tsx` | Studio UI route |
+| `src/app/api/generate-automation/route.ts` | POST API |
+| `src/lib/automation/generate.ts` | Mock keyword-matched generator |
+| `src/components/studio/*` | Prompt form + workflow result UI |
+
+The API currently returns **mock** templates (support triage, weekly reports, changelog, email, or a generic scaffold). To plug in a live LLM later, replace the body of `generateAutomation` / the route handler while keeping the `AutomationWorkflow` response shape.
+
 ## Project structure
 
 ```
 src/
-  app/                     Routes, layout, global styles, sitemap/robots
+  app/                     Routes (/, /studio), API, layout, sitemap/robots
   components/
     layout/                Header, MobileMenu, Footer, Logo, CustomCursor
-    sections/               One file per page section (Hero, About, Work, ...)
-    ui/                     Reusable primitives (RevealText, GlitchText, ServiceRow, ...)
+    sections/              Portfolio sections
+    studio/                Studio prompt + workflow UI
+    ui/                    Reusable primitives
   lib/
-    data/                   All editable site content lives here
-    hooks/                  useReducedMotion, useFinePointer
-    utils/                  cn() class-merging helper
-  types/                    Shared TypeScript types
+    automation/            Mock workflow generator
+    data/                  Portfolio content
+    hooks/                 useReducedMotion, useFinePointer
+    utils/                 cn()
+  types/                   Shared TypeScript types
 ```
 
 ## Editing content
 
-All real content lives in `src/lib/data/` — no component code needs to change to update copy:
+All portfolio copy lives in `src/lib/data/`:
 
 | File | What it controls |
 | --- | --- |
-| `site.ts` | Hero headline/subhead, about copy, contact copy, founder name, email, disciplines list |
-| `services.ts` | The six service rows (title, description, icon) |
-| `projects.ts` | The Work section's project cards (title, category, summary, tags, optional `href`) |
-| `stats.ts` | The animated stat counters in the About section |
-| `socials.ts` | Footer/contact social links |
-| `ai-lab.ts` | The scripted automation "Lab" terminal scenarios |
-
-All of the above ship with clearly-labeled **placeholder** content — swap it out by copying
-the shape of an existing entry.
-
-### Adding real photos
-
-The hero figure and founder portrait are original abstract/typographic placeholders
-(no stock photos), so there's nothing to license or attribute. To swap in a real photo:
-
-1. Add the image to `public/images/`.
-2. Replace the relevant placeholder markup (`src/components/sections/HeroFigure.tsx` or
-   the portrait block in `src/components/sections/About.tsx`) with a `next/image`.
+| `site.ts` | Hero, about, contact, disciplines |
+| `services.ts` | Service rows |
+| `projects.ts` | Work cards |
+| `stats.ts` | About counters |
+| `socials.ts` | Social links |
+| `ai-lab.ts` | Lab terminal scenarios |
 
 ## Design system notes
 
-- **Palette**: `ink` (#0a0a0a), `acid` (#dbff3e), `paper` (#f5f4f0), `fog` (#c9c9c4) —
-  defined once in `src/app/globals.css` under `@theme inline`. No other brand colors are
-  used anywhere in the UI.
-- **Type**: `Anton` (display/headlines), `Space Grotesk` (body/UI), `JetBrains Mono`
-  (labels, counters, terminal text) — loaded via `next/font/google` in `src/app/layout.tsx`.
-- **Motion**: Framer Motion handles reveals/UI transitions; GSAP handles the marquee loop,
-  the Work section's pinned horizontal scroll, and the animated stat counters. Every
-  motion-heavy component checks `useReducedMotion()` (from `src/lib/hooks`) and either
-  disables or simplifies its animation accordingly; a global CSS rule in `globals.css`
-  also clamps any remaining CSS transitions/animations under `prefers-reduced-motion`.
-- **The AI Lab terminal** (`src/components/sections/AiLabTerminal.tsx`) is a scripted,
-  client-side simulation — not a live model call — and is labeled as such in the UI.
+- **Palette**: `ink` (#0a0a0a), `acid` (#dbff3e), `paper` (#f5f4f0), `fog` (#c9c9c4)
+- **Type**: `Anton`, `Space Grotesk`, `JetBrains Mono` via `next/font/google`
+- **Motion**: respects `prefers-reduced-motion`
 
 ## Deployment
 
-The site has no required environment variables and is static-friendly. To deploy on
-Vercel:
-
-```bash
-npx vercel
-```
-
-or connect the repository in the Vercel dashboard — the default Next.js build settings
-work out of the box.
+No required environment variables for the mock Studio. Connect the repo in Vercel — default Next.js settings work.

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import { Logo } from "@/components/layout/Logo";
 import { MobileMenu } from "@/components/layout/MobileMenu";
@@ -10,6 +11,7 @@ const navLinks = [
   { href: "#work", label: "Work" },
   { href: "#services", label: "Services" },
   { href: "#lab", label: "Lab" },
+  { href: "/studio", label: "Studio" },
   { href: "#contact", label: "Contact" },
 ];
 
@@ -44,15 +46,30 @@ export function Header() {
         <Logo />
 
         <nav aria-label="Primary" className="hidden md:block">
-          <ul className="flex items-center gap-10 font-mono text-xs font-medium uppercase tracking-[0.25em]">
+          <ul className="flex items-center gap-8 font-mono text-xs font-medium uppercase tracking-[0.25em] lg:gap-10">
             {navLinks.map((link) => (
               <li key={link.href}>
-                <a
-                  href={link.href}
-                  className="relative py-1 after:absolute after:inset-x-0 after:-bottom-0.5 after:h-px after:origin-left after:scale-x-0 after:bg-current after:transition-transform after:duration-300 hover:after:scale-x-100"
-                >
-                  {link.label}
-                </a>
+                {link.href.startsWith("/") ? (
+                  <Link
+                    href={link.href}
+                    className={cn(
+                      "relative py-1",
+                      link.href === "/studio" &&
+                        "border-2 border-current px-3 py-2 transition-colors hover:bg-current hover:text-acid",
+                      link.href !== "/studio" &&
+                        "after:absolute after:inset-x-0 after:-bottom-0.5 after:h-px after:origin-left after:scale-x-0 after:bg-current after:transition-transform after:duration-300 hover:after:scale-x-100",
+                    )}
+                  >
+                    {link.label}
+                  </Link>
+                ) : (
+                  <a
+                    href={link.href}
+                    className="relative py-1 after:absolute after:inset-x-0 after:-bottom-0.5 after:h-px after:origin-left after:scale-x-0 after:bg-current after:transition-transform after:duration-300 hover:after:scale-x-100"
+                  >
+                    {link.label}
+                  </a>
+                )}
               </li>
             ))}
           </ul>

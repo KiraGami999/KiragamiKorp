@@ -51,3 +51,48 @@ export interface AiLabScenario {
   title: string;
   lines: AiLabLine[];
 }
+
+export type AutomationStepType =
+  | "trigger"
+  | "ingest"
+  | "transform"
+  | "ai"
+  | "action"
+  | "review";
+
+export interface AutomationStep {
+  id: string;
+  index: string;
+  type: AutomationStepType;
+  title: string;
+  description: string;
+  tool: string;
+}
+
+export interface AutomationWorkflow {
+  id: string;
+  title: string;
+  summary: string;
+  category: string;
+  prompt: string;
+  steps: AutomationStep[];
+  systemPrompt: string;
+  code: {
+    language: "python" | "typescript";
+    filename: string;
+    source: string;
+  };
+  inputs: string[];
+  outputs: string[];
+  estimatedTimeSaved: string;
+  generatedAt: string;
+  mode: "mock" | "live";
+}
+
+export interface GenerateAutomationRequest {
+  prompt: string;
+}
+
+export interface GenerateAutomationResponse {
+  workflow: AutomationWorkflow;
+}
