@@ -2,9 +2,9 @@ import { RevealLines, RevealText } from "@/components/ui/RevealText";
 import { SectionEyebrow } from "@/components/ui/SectionEyebrow";
 import { CopyEmailButton } from "@/components/ui/CopyEmailButton";
 import { socials } from "@/lib/data/socials";
-import { site } from "@/lib/data/site";
+import type { EditableSite } from "@/types/content";
 
-export function Contact() {
+export function Contact({ site }: { site: EditableSite }) {
   return (
     <section
       id="contact"

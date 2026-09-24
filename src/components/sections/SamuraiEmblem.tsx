@@ -3,6 +3,7 @@
 import { useCallback, useRef, useState, type MouseEvent, type PointerEvent } from "react";
 import Image from "next/image";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
+import { AccessTerminal } from "@/components/admin/AccessTerminal";
 import { useFinePointer } from "@/lib/hooks/useFinePointer";
 import { useReducedMotion } from "@/lib/hooks/useReducedMotion";
 import { cn } from "@/lib/utils/cn";
@@ -15,6 +16,7 @@ const SPRING = { stiffness: 220, damping: 18, mass: 0.4 };
  * - Mouse tilt (fine pointer only)
  * - Hover: channel-split glitch + acid flash
  * - Click / drag: brief glitch burst + free pointer play
+ * - Hidden sole-admin gate: click opens a cyberpunk terminal (no visible login UI)
  * Respects prefers-reduced-motion.
  */
 export function SamuraiEmblem({ className }: { className?: string }) {
@@ -26,6 +28,8 @@ export function SamuraiEmblem({ className }: { className?: string }) {
   const [hovered, setHovered] = useState(false);
   const [bursting, setBursting] = useState(false);
   const [dragging, setDragging] = useState(false);
+  const [terminalOpen, setTerminalOpen] = useState(false);
+  const dragMoved = useRef(false);
 
   const rotateX = useMotionValue(0);
   const rotateY = useMotionValue(0);
@@ -58,6 +62,7 @@ export function SamuraiEmblem({ className }: { className?: string }) {
 
   function handlePointerMove(event: PointerEvent<HTMLDivElement>) {
     if (!interactive) return;
+    if (dragging) dragMoved.current = true;
     updateTilt(event.clientX, event.clientY);
   }
 
@@ -74,12 +79,22 @@ export function SamuraiEmblem({ className }: { className?: string }) {
     window.setTimeout(() => setBursting(false), 520);
   }
 
+  function openTerminal() {
+    triggerBurst();
+    setTerminalOpen(true);
+  }
+
   function handleClick(event: MouseEvent<HTMLDivElement>) {
     event.preventDefault();
-    triggerBurst();
+    if (dragMoved.current) {
+      dragMoved.current = false;
+      return;
+    }
+    openTerminal();
   }
 
   function handlePointerDown(event: PointerEvent<HTMLDivElement>) {
+    dragMoved.current = false;
     if (!interactive) return;
     setDragging(true);
     event.currentTarget.setPointerCapture(event.pointerId);
@@ -96,85 +111,89 @@ export function SamuraiEmblem({ className }: { className?: string }) {
   }
 
   return (
-    <div
-      ref={containerRef}
-      role="img"
-      aria-label="KiragamiKorp studio mark — interactive samurai emblem"
-      tabIndex={0}
-      data-cursor-hover
-      onPointerEnter={() => setHovered(true)}
-      onPointerLeave={handlePointerLeave}
-      onPointerMove={handlePointerMove}
-      onPointerDown={handlePointerDown}
-      onPointerUp={handlePointerUp}
-      onClick={handleClick}
-      onKeyDown={(event) => {
-        if (event.key === "Enter" || event.key === " ") {
-          event.preventDefault();
-          triggerBurst();
-        }
-      }}
-      className={cn(
-        "samurai-emblem relative isolate select-none outline-none",
-        interactive ? "cursor-grab active:cursor-grabbing" : "cursor-default",
-        className,
-      )}
-      style={{ perspective: 900 }}
-    >
-      <motion.div
+    <>
+      <div
+        ref={containerRef}
+        role="button"
+        aria-label="KiragamiKorp studio mark"
+        tabIndex={0}
+        data-cursor-hover
+        onPointerEnter={() => setHovered(true)}
+        onPointerLeave={handlePointerLeave}
+        onPointerMove={handlePointerMove}
+        onPointerDown={handlePointerDown}
+        onPointerUp={handlePointerUp}
+        onClick={handleClick}
+        onKeyDown={(event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            openTerminal();
+          }
+        }}
         className={cn(
-          "relative will-change-transform",
-          (hovered || bursting) && "samurai-glitch",
-          bursting && "samurai-burst",
+          "samurai-emblem relative isolate select-none outline-none",
+          interactive ? "cursor-grab active:cursor-grabbing" : "cursor-pointer",
+          className,
         )}
-        style={
-          interactive
-            ? {
-                rotateX: springX,
-                rotateY: springY,
-                transformStyle: "preserve-3d",
-              }
-            : undefined
-        }
-        animate={
-          reducedMotion
-            ? undefined
-            : {
-                scale: hovered || dragging ? 1.05 : 1,
-              }
-        }
-        transition={{ type: "spring", stiffness: 280, damping: 22 }}
+        style={{ perspective: 900 }}
       >
-        <Image
-          src="/images/samurai.png"
-          alt=""
-          width={640}
-          height={640}
-          priority
-          draggable={false}
-          className="relative z-10 h-auto w-full drop-shadow-[8px_12px_0_rgba(10,10,10,0.35)]"
-        />
-
-        <span aria-hidden className="samurai-channel samurai-channel--acid" />
-        <span aria-hidden className="samurai-channel samurai-channel--ink" />
-
-        {interactive ? (
-          <motion.span
-            aria-hidden
-            className="pointer-events-none absolute inset-0 z-20 mix-blend-soft-light transition-opacity duration-200"
-            style={{
-              background: glareBackground,
-              opacity: glareOpacity,
-            }}
+        <motion.div
+          className={cn(
+            "relative will-change-transform",
+            (hovered || bursting) && "samurai-glitch",
+            bursting && "samurai-burst",
+          )}
+          style={
+            interactive
+              ? {
+                  rotateX: springX,
+                  rotateY: springY,
+                  transformStyle: "preserve-3d",
+                }
+              : undefined
+          }
+          animate={
+            reducedMotion
+              ? undefined
+              : {
+                  scale: hovered || dragging ? 1.05 : 1,
+                }
+          }
+          transition={{ type: "spring", stiffness: 280, damping: 22 }}
+        >
+          <Image
+            src="/images/samurai.png"
+            alt=""
+            width={640}
+            height={640}
+            priority
+            draggable={false}
+            className="relative z-10 h-auto w-full drop-shadow-[8px_12px_0_rgba(10,10,10,0.35)]"
           />
-        ) : null}
 
-        <span aria-hidden className="samurai-scan" />
-      </motion.div>
+          <span aria-hidden className="samurai-channel samurai-channel--acid" />
+          <span aria-hidden className="samurai-channel samurai-channel--ink" />
 
-      <p className="mt-3 text-center font-mono text-[10px] uppercase tracking-[0.28em] text-ink/50">
-        {interactive ? "Hover · drag · click" : "Studio mark"}
-      </p>
-    </div>
+          {interactive ? (
+            <motion.span
+              aria-hidden
+              className="pointer-events-none absolute inset-0 z-20 mix-blend-soft-light transition-opacity duration-200"
+              style={{
+                background: glareBackground,
+                opacity: glareOpacity,
+              }}
+            />
+          ) : null}
+
+          <span aria-hidden className="samurai-scan" />
+        </motion.div>
+
+        <p className="mt-3 text-center font-mono text-[10px] uppercase tracking-[0.28em] text-ink/50">
+          {interactive ? "Hover · drag · click" : "Studio mark"}
+        </p>
+      </div>
+
+      <AccessTerminal open={terminalOpen} onClose={() => setTerminalOpen(false)} />
+    </>
   );
 }

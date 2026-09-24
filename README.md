@@ -82,10 +82,21 @@ All portfolio copy lives in `src/lib/data/`:
 | --- | --- |
 | `site.ts` | Hero, about, contact, disciplines |
 | `services.ts` | Service rows |
-| `projects.ts` | Work cards |
-| `stats.ts` | About counters |
+| `projects.ts` | Work cards (seed / fallback) |
+| `stats.ts` | About counters (seed / fallback) |
 | `socials.ts` | Social links |
 | `ai-lab.ts` | Lab terminal scenarios |
+
+## Admin CMS (sole operator)
+
+There is **no public login link**. Entry is hidden behind the hero samurai mark:
+
+1. Click the samurai image → cyberpunk terminal
+2. Enter clearance phrase: `Screw Arasaka` (override with `GATE_PHRASE`)
+3. Personal login at `/admin/login` using `ADMIN_USERNAME` / `ADMIN_PASSWORD`
+4. Ops deck at `/admin` — edit projects, site copy, and stats; saved to Neon
+
+Required env vars: `DATABASE_URL`, `ADMIN_USERNAME`, `ADMIN_PASSWORD`, `ADMIN_SESSION_SECRET`.
 
 ## Design system notes
 
@@ -95,4 +106,9 @@ All portfolio copy lives in `src/lib/data/`:
 
 ## Deployment
 
-Connect the repo in Vercel — default Next.js settings work. Add `GROQ_API_KEY` under Project → Settings → Environment Variables to enable live generation; without it the Studio still works using templates.
+Connect the repo in Vercel — default Next.js settings work. Add these environment variables for full features:
+
+- `GROQ_API_KEY` — live Studio generation (optional; templates otherwise)
+- `DATABASE_URL` — Neon Postgres for CMS content
+- `ADMIN_USERNAME` / `ADMIN_PASSWORD` / `ADMIN_SESSION_SECRET` — sole admin login
+- `GATE_PHRASE` — optional; defaults to `Screw Arasaka`

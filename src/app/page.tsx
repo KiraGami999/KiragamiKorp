@@ -7,21 +7,26 @@ import { About } from "@/components/sections/About";
 import { Services } from "@/components/sections/Services";
 import { Contact } from "@/components/sections/Contact";
 import { DynamicHeavySections } from "@/components/sections/DynamicHeavySections";
+import { getSiteContent } from "@/lib/content/store";
 
-export default function Home() {
+export const dynamic = "force-dynamic";
+
+export default async function Home() {
+  const content = await getSiteContent();
+
   return (
     <>
       <CustomCursor />
       <Header />
       <main id="main-content">
-        <Hero />
-        <DisciplinesMarquee />
-        <About />
+        <Hero site={content.site} />
+        <DisciplinesMarquee disciplines={content.site.disciplines} />
+        <About site={content.site} stats={content.stats} />
         <Services />
-        <DynamicHeavySections />
-        <Contact />
+        <DynamicHeavySections projects={content.projects} />
+        <Contact site={content.site} />
       </main>
-      <Footer />
+      <Footer site={content.site} />
     </>
   );
 }

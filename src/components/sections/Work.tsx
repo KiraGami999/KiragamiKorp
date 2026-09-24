@@ -5,10 +5,10 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { useReducedMotion } from "@/lib/hooks/useReducedMotion";
-import { projects } from "@/lib/data/projects";
 import { ProjectCard } from "@/components/ui/ProjectCard";
 import { SectionEyebrow } from "@/components/ui/SectionEyebrow";
 import { RevealLines } from "@/components/ui/RevealText";
+import type { Project } from "@/types";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
@@ -21,7 +21,7 @@ if (typeof window !== "undefined") {
  * reduced-motion users get a plain vertical stack instead: scroll-jacking a
  * touch device is bad UX, so it's never applied there.
  */
-export function Work() {
+export function Work({ projects }: { projects: Project[] }) {
   const reducedMotion = useReducedMotion();
   const sectionRef = useRef<HTMLElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
@@ -58,7 +58,7 @@ export function Work() {
 
       return () => mm.revert();
     },
-    { scope: sectionRef, dependencies: [reducedMotion] },
+    { scope: sectionRef, dependencies: [reducedMotion, projects] },
   );
 
   return (

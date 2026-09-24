@@ -2,10 +2,10 @@ import { RevealLines, RevealText } from "@/components/ui/RevealText";
 import { SectionEyebrow } from "@/components/ui/SectionEyebrow";
 import { AnimatedCounter } from "@/components/ui/AnimatedCounter";
 import { GlitchText } from "@/components/ui/GlitchText";
-import { site } from "@/lib/data/site";
-import { stats } from "@/lib/data/stats";
+import type { EditableSite } from "@/types/content";
+import type { Stat } from "@/types";
 
-export function About() {
+export function About({ site, stats }: { site: EditableSite; stats: Stat[] }) {
   return (
     <section id="about" aria-labelledby="about-heading" className="bg-paper py-24 sm:py-32">
       <div className="mx-auto grid max-w-[1600px] grid-cols-1 gap-16 px-6 sm:px-10 lg:grid-cols-12 lg:gap-10 lg:px-16">

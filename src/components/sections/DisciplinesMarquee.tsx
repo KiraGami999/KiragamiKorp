@@ -4,14 +4,16 @@ import { useRef } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { useReducedMotion } from "@/lib/hooks/useReducedMotion";
-import { disciplines } from "@/lib/data/site";
-
 /**
  * A kinetic reinforcement of the six disciplines already listed accessibly
  * in the Services section below — purely decorative, so it's hidden from
  * assistive tech and pauses on hover / disables under reduced motion.
  */
-export function DisciplinesMarquee() {
+export function DisciplinesMarquee({
+  disciplines,
+}: {
+  disciplines: { id: string; label: string }[];
+}) {
   const trackRef = useRef<HTMLDivElement>(null);
   const reducedMotion = useReducedMotion();
   const tweenRef = useRef<gsap.core.Tween | null>(null);

@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import type { Project } from "@/types";
 
 const Work = dynamic(() => import("@/components/sections/Work").then((mod) => mod.Work), {
   ssr: false,
@@ -17,10 +18,10 @@ const AiLab = dynamic(() => import("@/components/sections/AiLab").then((mod) => 
  * code-split and mounted client-side only — keeps the initial JS/HTML for
  * the hero and above-the-fold content light.
  */
-export function DynamicHeavySections() {
+export function DynamicHeavySections({ projects }: { projects: Project[] }) {
   return (
     <>
-      <Work />
+      <Work projects={projects} />
       <AiLab />
     </>
   );

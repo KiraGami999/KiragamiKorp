@@ -1,6 +1,6 @@
 import { ArrowUp } from "lucide-react";
 import Link from "next/link";
-import { site } from "@/lib/data/site";
+import type { EditableSite } from "@/types/content";
 
 const sitemap = [
   { href: "#work", label: "Work" },
@@ -11,7 +11,7 @@ const sitemap = [
   { href: "#contact", label: "Contact" },
 ];
 
-export function Footer() {
+export function Footer({ site }: { site: EditableSite }) {
   const year = new Date().getFullYear();
 
   return (

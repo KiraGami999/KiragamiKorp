@@ -5,9 +5,9 @@ import { SectionEyebrow } from "@/components/ui/SectionEyebrow";
 import { SectionDivider } from "@/components/ui/SectionDivider";
 import { ScrollLinkButton } from "@/components/ui/ScrollLinkButton";
 import { SamuraiEmblem } from "@/components/sections/SamuraiEmblem";
-import { site } from "@/lib/data/site";
+import type { EditableSite } from "@/types/content";
 
-export function Hero() {
+export function Hero({ site }: { site: EditableSite }) {
   return (
     <div className="relative">
       <section
