@@ -1,0 +1,19 @@
+{
+  "name": "@kiragamikorp/agent",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "KORP — the KiragamiKorp coding agent. A local-first Cursor, built from scratch.",
+  "bin": {
+    "korp": "./bin/korp.js"
+  },
+  "scripts": {
+    "start": "tsx src/main.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}
