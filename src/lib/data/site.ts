@@ -29,4 +29,5 @@ export const disciplines = [
   { id: "prompt", label: "Prompt Engineering" },
   { id: "architecture", label: "Software Architecture" },
   { id: "creative", label: "Creative Digital Experiences" },
+  { id: "signal", label: "Digital Marketing Systems" },
 ];

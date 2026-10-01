@@ -5,6 +5,7 @@ import type { EditableSite } from "@/types/content";
 const sitemap = [
   { href: "#work", label: "Work" },
   { href: "#services", label: "Services" },
+  { href: "#signal", label: "Signal" },
   { href: "#lab", label: "Lab" },
   { href: "/studio", label: "Studio" },
   { href: "#about", label: "About" },

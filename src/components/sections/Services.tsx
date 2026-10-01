@@ -23,7 +23,7 @@ export function Services() {
             />
           </div>
           <p className="max-w-xs font-mono text-xs uppercase leading-relaxed tracking-widest text-ink/60">
-            Six disciplines, one studio. Select a line to expand it.
+            One studio. Select a line to expand it.
           </p>
         </div>
 

@@ -5,6 +5,7 @@ import { Hero } from "@/components/sections/Hero";
 import { DisciplinesMarquee } from "@/components/sections/DisciplinesMarquee";
 import { About } from "@/components/sections/About";
 import { Services } from "@/components/sections/Services";
+import { Signal } from "@/components/sections/Signal";
 import { Contact } from "@/components/sections/Contact";
 import { DynamicHeavySections } from "@/components/sections/DynamicHeavySections";
 import { getSiteContent } from "@/lib/content/store";
@@ -23,6 +24,7 @@ export default async function Home() {
         <DisciplinesMarquee disciplines={content.site.disciplines} />
         <About site={content.site} stats={content.stats} />
         <Services />
+        <Signal />
         <DynamicHeavySections projects={content.projects} />
         <Contact site={content.site} />
       </main>

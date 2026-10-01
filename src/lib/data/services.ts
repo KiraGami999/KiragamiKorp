@@ -5,6 +5,7 @@ import {
   Terminal,
   Boxes,
   Sparkles,
+  Megaphone,
 } from "lucide-react";
 import type { Service } from "@/types";
 
@@ -56,5 +57,13 @@ export const services: Service[] = [
     description:
       "Interactive, motion-driven interfaces that make a product memorable instead of merely functional.",
     icon: Sparkles,
+  },
+  {
+    id: "signal",
+    index: "07",
+    title: "Digital Marketing Systems",
+    description:
+      "The website, the social channels, and the workflows between them — run as one system, so a business gets a marketing department without staffing one.",
+    icon: Megaphone,
   },
 ];
