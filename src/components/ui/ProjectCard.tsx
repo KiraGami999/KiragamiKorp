@@ -1,4 +1,4 @@
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, Play } from "lucide-react";
 import Link from "next/link";
 import type { Project } from "@/types";
 import { ProjectVisual } from "@/components/ui/ProjectVisual";
@@ -26,6 +26,12 @@ export function ProjectCard({ project, className }: { project: Project; classNam
             />
           </h3>
           <p className="mt-3 max-w-md text-sm leading-relaxed text-paper/70">{project.summary}</p>
+          {project.videos?.length ? (
+            <p className="mt-4 inline-flex items-center gap-2 bg-acid px-2 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-ink">
+              <Play className="h-3 w-3 fill-current" aria-hidden />
+              {project.videos.length} {project.videos.length === 1 ? "episode" : "episodes"} · learn how it was built
+            </p>
+          ) : null}
           <ul className="mt-4 flex flex-wrap gap-2">
             {project.tags.map((tag) => (
               <li

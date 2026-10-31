@@ -95,6 +95,10 @@ ALTER TABLE projects ADD COLUMN IF NOT EXISTS role TEXT;
 ALTER TABLE projects ADD COLUMN IF NOT EXISTS repo_url TEXT;
 ALTER TABLE projects ADD COLUMN IF NOT EXISTS images JSONB NOT NULL DEFAULT '[]'::jsonb;
 
+-- Teaching series (YouTube references only) and the "how AI built this" breakdown.
+ALTER TABLE projects ADD COLUMN IF NOT EXISTS videos JSONB NOT NULL DEFAULT '[]'::jsonb;
+ALTER TABLE projects ADD COLUMN IF NOT EXISTS ai_analysis JSONB;
+
 -- Project images, served from /api/media/<id>.
 CREATE TABLE IF NOT EXISTS media_assets (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

@@ -2,7 +2,8 @@ import { getDefaultContent } from "@/lib/content/defaults";
 import { getSql, requireSql } from "@/lib/db";
 import { isMediaId, pruneOrphanMedia } from "@/lib/media";
 import type { EditableSite, SiteContent, SiteContentRecord } from "@/types/content";
-import type { Project, ProjectCategory, ProjectImage, Stat } from "@/types";
+import { MAX_VIDEOS_PER_PROJECT, parseYouTubeId } from "@/lib/video";
+import type { AiAnalysis, Project, ProjectCategory, ProjectImage, ProjectVideo, Stat } from "@/types";
 
 const CATEGORIES: readonly ProjectCategory[] = ["Mobile", "Web", "AI & Automation"];
 const MAX_IMAGES_PER_PROJECT = 12;
@@ -86,6 +87,69 @@ function normalizeImages(raw: unknown): ProjectImage[] {
   return images;
 }
 
+function normalizeVideos(raw: unknown): ProjectVideo[] {
+  if (!Array.isArray(raw)) return [];
+  const seenIds = new Set<string>();
+  const seenVideos = new Set<string>();
+  const videos: ProjectVideo[] = [];
+
+  for (const item of raw) {
+    if (!item || typeof item !== "object") continue;
+    const row = item as Record<string, unknown>;
+    // Accept a stored id or a pasted link; either way only the 11-char id survives.
+    const videoId = parseYouTubeId(asString(row.videoId ?? row.url));
+    if (!videoId || seenVideos.has(videoId)) continue;
+    seenVideos.add(videoId);
+
+    let id = asString(row.id).replace(/[^\w-]/g, "").slice(0, 40) || `ep-${videos.length + 1}`;
+    while (seenIds.has(id)) id = `${id}-${videos.length + 1}`;
+    seenIds.add(id);
+
+    const summary = asString(row.summary).trim().slice(0, 300);
+    const notes = asString(row.notes).trim().slice(0, 8_000);
+    videos.push({
+      id,
+      videoId,
+      title: asString(row.title).trim().slice(0, 120) || `Episode ${videos.length + 1}`,
+      ...(summary ? { summary } : {}),
+      ...(notes ? { notes } : {}),
+    });
+    if (videos.length >= MAX_VIDEOS_PER_PROJECT) break;
+  }
+  return videos;
+}
+
+function normalizeAiAnalysis(raw: unknown): AiAnalysis | undefined {
+  if (!raw || typeof raw !== "object") return undefined;
+  const row = raw as Record<string, unknown>;
+  const text = (value: unknown, max: number) => asString(value).trim().slice(0, max);
+
+  const seenTools = new Set<string>();
+  const tools = asStringArray(row.tools)
+    .map((tool) => tool.trim().slice(0, 40))
+    .filter((tool) => {
+      const key = tool.toLowerCase();
+      if (!tool || seenTools.has(key)) return false;
+      seenTools.add(key);
+      return true;
+    })
+    .slice(0, 12);
+  const fields = {
+    problem: text(row.problem, 2_000),
+    prompts: text(row.prompts, 6_000),
+    mistakes: text(row.mistakes, 3_000),
+    result: text(row.result, 2_000),
+    metric: text(row.metric, 60),
+    takeaway: text(row.takeaway, 1_500),
+  };
+
+  const analysis: AiAnalysis = {
+    ...(tools.length ? { tools } : {}),
+    ...Object.fromEntries(Object.entries(fields).filter(([, value]) => value)),
+  };
+  return Object.keys(analysis).length ? analysis : undefined;
+}
+
 function normalizeProjects(raw: unknown): Project[] {
   if (!Array.isArray(raw)) return getDefaultContent().projects;
 
@@ -106,6 +170,7 @@ function normalizeProjects(raw: unknown): Project[] {
     const href = asUrl(row.href);
     const repoUrl = asUrl(row.repoUrl ?? row.repo_url);
     const role = asString(row.role).trim();
+    const aiAnalysis = normalizeAiAnalysis(row.aiAnalysis ?? row.ai_analysis);
 
     projects.push({
       id,
@@ -120,7 +185,9 @@ function normalizeProjects(raw: unknown): Project[] {
         .slice(0, 16),
       description: asString(row.description).slice(0, 12_000),
       images: normalizeImages(row.images),
+      videos: normalizeVideos(row.videos),
       published: row.published !== false,
+      ...(aiAnalysis ? { aiAnalysis } : {}),
       ...(href ? { href } : {}),
       ...(repoUrl ? { repoUrl } : {}),
       ...(role ? { role: role.slice(0, 80) } : {}),
@@ -159,7 +226,7 @@ async function readTables(includeDrafts: boolean): Promise<SiteContentRecord | n
   const [settingsRows, projectRows, statRows] = await Promise.all([
     sql`SELECT data, updated_at FROM site_settings WHERE id = 'default' LIMIT 1`,
     sql`
-      SELECT id, title, category, year, summary, tags, href, description, role, repo_url, images, published
+      SELECT id, title, category, year, summary, tags, href, description, role, repo_url, images, videos, ai_analysis, published
       FROM projects
       WHERE published = true OR ${includeDrafts}
       ORDER BY sort_order ASC, created_at ASC
@@ -219,13 +286,15 @@ export async function saveSiteContent(content: SiteContent): Promise<SiteContent
     await sql`
       INSERT INTO projects (
         id, index_label, title, category, year, summary, tags, href,
-        description, role, repo_url, images, published, sort_order, updated_at
+        description, role, repo_url, images, videos, ai_analysis, published, sort_order, updated_at
       )
       VALUES (
         ${p.id}, ${p.index}, ${p.title}, ${p.category}, ${p.year}, ${p.summary},
         ${JSON.stringify(p.tags)}::jsonb, ${p.href ?? null},
         ${p.description ?? ""}, ${p.role ?? null}, ${p.repoUrl ?? null},
-        ${JSON.stringify(p.images ?? [])}::jsonb, ${p.published !== false}, ${i}, now()
+        ${JSON.stringify(p.images ?? [])}::jsonb, ${JSON.stringify(p.videos ?? [])}::jsonb,
+        ${p.aiAnalysis ? JSON.stringify(p.aiAnalysis) : null}::jsonb,
+        ${p.published !== false}, ${i}, now()
       )
       ON CONFLICT (id) DO UPDATE SET
         index_label = EXCLUDED.index_label,
@@ -239,6 +308,8 @@ export async function saveSiteContent(content: SiteContent): Promise<SiteContent
         role = EXCLUDED.role,
         repo_url = EXCLUDED.repo_url,
         images = EXCLUDED.images,
+        videos = EXCLUDED.videos,
+        ai_analysis = EXCLUDED.ai_analysis,
         published = EXCLUDED.published,
         sort_order = EXCLUDED.sort_order,
         updated_at = now()

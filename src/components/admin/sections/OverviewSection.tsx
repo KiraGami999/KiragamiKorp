@@ -2,6 +2,7 @@
 
 import { ArrowRight, CircleAlert, CircleCheck } from "lucide-react";
 import { Panel, Stat } from "@/components/admin/ui";
+import { RECOMMENDED_EPISODES } from "@/lib/video";
 import type { Project } from "@/types";
 import type { SiteContent } from "@/types/content";
 import type { AdminSectionId } from "@/components/admin/AdminShell";
@@ -21,6 +22,10 @@ function findGaps(projects: Project[]): Gap[] {
     if (!project.tags.length) issues.push("no stack listed");
     if (!project.summary.trim()) issues.push("no card summary");
     if (project.images?.some((image) => !image.alt.trim())) issues.push("images missing alt text");
+    if (!project.aiAnalysis) issues.push("no AI analysis");
+    const episodes = project.videos?.length ?? 0;
+    if (episodes === 0) issues.push("no video episodes");
+    else if (episodes < RECOMMENDED_EPISODES) issues.push(`${episodes}/${RECOMMENDED_EPISODES} episodes`);
     if (issues.length) gaps.push({ projectId: project.id, title: project.title, issue: issues.join(", ") });
   }
   return gaps;
@@ -40,6 +45,7 @@ export function OverviewSection({
   const live = content.projects.filter((project) => project.published !== false);
   const drafts = content.projects.length - live.length;
   const images = content.projects.reduce((sum, project) => sum + (project.images?.length ?? 0), 0);
+  const episodes = content.projects.reduce((sum, project) => sum + (project.videos?.length ?? 0), 0);
   const gaps = findGaps(content.projects);
   const stack = new Map<string, number>();
   for (const project of live) for (const tag of project.tags) stack.set(tag, (stack.get(tag) ?? 0) + 1);
@@ -75,8 +81,9 @@ export function OverviewSection({
         </div>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
         <Stat label="Live projects" value={live.length} hint={drafts ? `${drafts} draft${drafts > 1 ? "s" : ""}` : "No drafts"} />
+        <Stat label="Episodes" value={episodes} hint="YouTube lessons across all projects" />
         <Stat label="Images" value={images} hint="Across all projects" />
         <Stat label="Stack items" value={stack.size} hint="Unique technologies on live work" />
         <Stat label="Stats on site" value={content.stats.length} />

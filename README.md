@@ -99,13 +99,24 @@ There is **no public login link**. Entry is hidden behind the hero samurai mark:
 | Section | What it does |
 | --- | --- |
 | Overview | Counts, content gaps (missing covers, write-ups, alt text), quick links |
-| Selected work | Project editor: cover + gallery uploads, stack chips, role, live/repo links, long-form case study, draft/published, reorder, live card preview |
+| Selected work | Project editor: cover + gallery uploads, stack chips, role, live/repo links, **AI analysis**, **video series**, long-form case study, draft/published, reorder, live card preview |
 | Site copy / Stats | Hero, about, contact copy and the numbers strip |
 | Studio | Live AI on/off, model, temperature, per-visitor rate limit, house rules, generation log |
 | Security | Password (signs out other devices), username/display name, clearance phrase, active sessions |
 | System | Database, storage, session secret, AI provider test, failed logins, audit log |
 
 Content edits share one **Save & publish** bar (Ctrl+S). Images are resized to 2000px WebP in the browser, stored in `media_assets`, and served from `/api/media/<id>`. Each published project gets a case-study page at `/work/<id>`.
+
+### Teaching series and AI analysis
+
+Every project can teach as well as show off. In the project editor:
+
+- **AI analysis**: the problem, AI tools used, the prompts that worked, where the AI got it wrong, the result, a headline metric (e.g. `6 hrs → 20 min`) and a learner takeaway. Fields are optional; empty ones are hidden. Renders as "How AI built this" on `/work/<id>`, with copy buttons on each prompt.
+- **Video series**: up to 12 episodes per project (5 recommended: brief → prompting → build → when the AI got it wrong → shipping). Upload each video to YouTube (Public or Unlisted, embedding on), then paste the link. The admin checks the video with YouTube and fills in the title.
+
+Videos are never stored here, only the 11-character YouTube id, so hosting is free and the database stays tiny. The public player loads nothing from YouTube until someone presses play, then uses `youtube-nocookie.com`. Each episode can carry chapters or a transcript for people on slow data.
+
+New `projects` columns: `videos` (JSONB array) and `ai_analysis` (JSONB). Existing databases need the two `ALTER TABLE` lines at the bottom of `scripts/schema.sql` before deploying this code.
 
 ### Neon database
 

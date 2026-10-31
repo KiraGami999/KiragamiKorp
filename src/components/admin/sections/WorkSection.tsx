@@ -3,8 +3,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowDown, ArrowUp, Copy, ExternalLink, ImageOff, Plus, Trash2 } from "lucide-react";
+import { AiAnalysisEditor } from "@/components/admin/AiAnalysisEditor";
 import { ImageManager } from "@/components/admin/ImageManager";
 import { TagInput } from "@/components/admin/TagInput";
+import { VideoManager } from "@/components/admin/VideoManager";
 import { Button, Field, Panel, SelectField, Toggle } from "@/components/admin/ui";
 import { ProjectCard } from "@/components/ui/ProjectCard";
 import { cn } from "@/lib/utils/cn";
@@ -29,6 +31,7 @@ export function createProject(position: number): Project {
     tags: [],
     description: "",
     images: [],
+    videos: [],
     published: false,
   };
 }
@@ -260,6 +263,20 @@ export function WorkSection({
               projectTitle={selected.title}
               onChange={(images) => patch({ images })}
             />
+          </Panel>
+
+          <Panel
+            title="AI analysis"
+            description="How AI was used to build this. Shown on the case study as “How AI built this”. Fill in only what you have; empty fields are hidden."
+          >
+            <AiAnalysisEditor analysis={selected.aiAnalysis} onChange={(aiAnalysis) => patch({ aiAnalysis })} />
+          </Panel>
+
+          <Panel
+            title="Video series"
+            description="Your teaching episodes for this project. They play on the case study with a click-to-load YouTube player, so nothing heavy loads until someone presses play."
+          >
+            <VideoManager videos={selected.videos ?? []} onChange={(videos) => patch({ videos })} />
           </Panel>
 
           <Panel title="Case study" description="Long-form story shown on the project page. Leave a blank line between paragraphs.">

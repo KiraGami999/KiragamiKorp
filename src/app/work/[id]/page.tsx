@@ -2,10 +2,13 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, ArrowRight, ArrowUpRight, Code2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, ArrowUpRight, Code2, Play, Sparkles } from "lucide-react";
 import { Logo } from "@/components/layout/Logo";
 import { ProjectVisual } from "@/components/ui/ProjectVisual";
+import { AiAnalysisSection, hasAiAnalysis } from "@/components/work/AiAnalysisSection";
+import { EpisodePlayer } from "@/components/work/EpisodePlayer";
 import { getProjectById } from "@/lib/content/store";
+import { cn } from "@/lib/utils/cn";
 
 export const dynamic = "force-dynamic";
 
@@ -41,6 +44,8 @@ export default async function ProjectPage({ params }: PageProps<"/work/[id]">) {
 
   const { project, next } = found;
   const [cover, ...gallery] = project.images ?? [];
+  const videos = project.videos ?? [];
+  const analysis = hasAiAnalysis(project.aiAnalysis) ? project.aiAnalysis : undefined;
   const body = paragraphs(project.description);
   const facts = [
     { label: "Category", value: project.category },
@@ -83,14 +88,38 @@ export default async function ProjectPage({ params }: PageProps<"/work/[id]">) {
                 ))}
               </dl>
 
-              {project.href || project.repoUrl ? (
+              {project.href || project.repoUrl || videos.length || analysis ? (
                 <div className="mt-10 flex flex-wrap gap-4">
+                  {videos.length ? (
+                    <a
+                      href="#series"
+                      className="inline-flex items-center gap-2 border-2 border-acid bg-acid px-6 py-3 font-mono text-xs font-semibold uppercase tracking-[0.2em] text-ink transition-colors hover:bg-transparent hover:text-acid"
+                    >
+                      <Play className="h-4 w-4 fill-current" aria-hidden />
+                      Watch the series · {videos.length} {videos.length === 1 ? "episode" : "episodes"}
+                    </a>
+                  ) : null}
+                  {analysis ? (
+                    <a
+                      href="#ai-analysis"
+                      className="inline-flex items-center gap-2 border-2 border-paper/40 px-6 py-3 font-mono text-xs font-semibold uppercase tracking-[0.2em] text-paper transition-colors hover:border-acid hover:text-acid"
+                    >
+                      <Sparkles className="h-4 w-4" aria-hidden />
+                      How AI built this
+                    </a>
+                  ) : null}
                   {project.href ? (
                     <a
                       href={project.href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 border-2 border-acid bg-acid px-6 py-3 font-mono text-xs font-semibold uppercase tracking-[0.2em] text-ink transition-colors hover:bg-transparent hover:text-acid"
+                      className={cn(
+                        "inline-flex items-center gap-2 border-2 px-6 py-3 font-mono text-xs font-semibold uppercase tracking-[0.2em] transition-colors",
+                        // The series is the primary call to action when there is one.
+                        videos.length
+                          ? "border-paper/40 text-paper hover:border-acid hover:text-acid"
+                          : "border-acid bg-acid text-ink hover:bg-transparent hover:text-acid",
+                      )}
                     >
                       Visit live
                       <ArrowUpRight className="h-4 w-4" aria-hidden />
@@ -163,6 +192,35 @@ export default async function ProjectPage({ params }: PageProps<"/work/[id]">) {
             </div>
           </div>
         </section>
+
+        {analysis ? <AiAnalysisSection analysis={analysis} /> : null}
+
+        {videos.length ? (
+          <section
+            id="series"
+            aria-labelledby="series-title"
+            className="scroll-mt-20 border-t-2 border-ink bg-acid text-ink"
+          >
+            <div className="mx-auto max-w-[1600px] px-6 py-16 sm:px-10 lg:px-16 lg:py-24">
+              <p className="font-mono text-xs uppercase tracking-[0.3em] text-ink/70">LOG.05 — Learn it</p>
+              <h2
+                id="series-title"
+                className="mt-5 font-display text-6xl uppercase leading-[0.88] tracking-tight sm:text-8xl"
+              >
+                Build it
+                <br />
+                with me
+              </h2>
+              <p className="mt-6 max-w-xl text-lg leading-relaxed text-ink/75">
+                {videos.length} {videos.length === 1 ? "episode" : "episodes"} showing how {project.title} was built
+                with AI, mistakes included. Watch in order, or jump to the part you need.
+              </p>
+              <div className="mt-12">
+                <EpisodePlayer videos={videos} projectTitle={project.title} />
+              </div>
+            </div>
+          </section>
+        ) : null}
 
         {gallery.length ? (
           <section aria-label="Gallery" className="border-t-2 border-ink bg-paper text-ink">

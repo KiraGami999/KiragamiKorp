@@ -22,6 +22,36 @@ export interface ProjectImage {
   height?: number;
 }
 
+/** One episode of a project's teaching series. Only a YouTube reference is stored, never video bytes. */
+export interface ProjectVideo {
+  id: string;
+  /** 11-character YouTube video id. */
+  videoId: string;
+  title: string;
+  /** One-line description shown in the episode list. */
+  summary?: string;
+  /** Chapter timestamps, links, or a transcript. Plain text, blank lines separate paragraphs. */
+  notes?: string;
+}
+
+/** The "how AI built this" breakdown shown on a case-study page. Every field is optional. */
+export interface AiAnalysis {
+  /** The real-world problem and who it is for. */
+  problem?: string;
+  /** AI tools and models used, e.g. "Cursor", "Claude", "Groq". */
+  tools?: string[];
+  /** The prompts that worked, one per paragraph. */
+  prompts?: string;
+  /** Where the AI got it wrong and how it was fixed. */
+  mistakes?: string;
+  /** What shipped and the result. */
+  result?: string;
+  /** Short headline number, e.g. "6 hrs → 20 min". */
+  metric?: string;
+  /** What a learner should take away. */
+  takeaway?: string;
+}
+
 export interface Project {
   id: string;
   index: string;
@@ -40,6 +70,10 @@ export interface Project {
   repoUrl?: string;
   /** First image is the cover. */
   images?: ProjectImage[];
+  /** Teaching series: YouTube episodes, in watch order. */
+  videos?: ProjectVideo[];
+  /** Structured breakdown of how AI was used to build this. */
+  aiAnalysis?: AiAnalysis;
   /** Drafts are saved but hidden from the public site. */
   published?: boolean;
 }

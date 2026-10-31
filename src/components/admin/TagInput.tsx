@@ -38,11 +38,15 @@ export function TagInput({
   tags,
   onChange,
   max = 16,
+  suggestions: suggestionPool = SUGGESTIONS,
+  placeholder = "Type and press Enter",
 }: {
   label: string;
   tags: string[];
   onChange: (tags: string[]) => void;
   max?: number;
+  suggestions?: readonly string[];
+  placeholder?: string;
 }) {
   const [draft, setDraft] = useState("");
   const listId = useId();
@@ -74,7 +78,7 @@ export function TagInput({
     }
   }
 
-  const suggestions = SUGGESTIONS.filter(
+  const suggestions = suggestionPool.filter(
     (item) => !tags.some((tag) => tag.toLowerCase() === item.toLowerCase()),
   ).slice(0, 10);
 
@@ -106,7 +110,7 @@ export function TagInput({
           onChange={(event) => setDraft(event.target.value)}
           onKeyDown={handleKey}
           onBlur={() => add(draft)}
-          placeholder={tags.length >= max ? "Limit reached" : "Type and press Enter"}
+          placeholder={tags.length >= max ? "Limit reached" : placeholder}
           disabled={tags.length >= max}
           className="min-w-[10rem] flex-1 bg-transparent px-1 py-1 font-mono text-sm text-ink outline-none placeholder:text-ink/30"
         />
