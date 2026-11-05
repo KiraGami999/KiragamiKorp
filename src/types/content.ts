@@ -14,6 +14,8 @@ export interface EditableSite {
   contactHeading: string[];
   contactBody: string;
   email: string;
+  /** Your YouTube channel; shown as a Subscribe button on /learn. */
+  youtubeUrl?: string;
   disciplines: { id: string; label: string }[];
 }
 

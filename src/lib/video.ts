@@ -46,6 +46,16 @@ export function parseYouTubeId(input: string): string | null {
   return candidate && isVideoId(candidate) ? candidate : null;
 }
 
+/** Channel, handle or playlist links: only youtube.com hosts are allowed as outbound links. */
+export function isYouTubeUrl(value: string): boolean {
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" && /^(www\.|m\.)?youtube\.com$/i.test(url.hostname);
+  } catch {
+    return false;
+  }
+}
+
 export function youTubeWatchUrl(videoId: string): string {
   return `https://www.youtube.com/watch?v=${videoId}`;
 }

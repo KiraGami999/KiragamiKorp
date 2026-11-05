@@ -255,14 +255,10 @@ export function WorkSection({
           </Panel>
 
           <Panel
-            title="Images"
-            description="Screenshots, mockups and diagrams. The first image is the card cover and the case-study hero; the rest form the gallery."
+            title="Tutorial videos"
+            description="Your teaching episodes for this project. They appear on this project's case study and on the public Learn page (/learn), with a click-to-load YouTube player."
           >
-            <ImageManager
-              images={selected.images ?? []}
-              projectTitle={selected.title}
-              onChange={(images) => patch({ images })}
-            />
+            <VideoManager videos={selected.videos ?? []} onChange={(videos) => patch({ videos })} />
           </Panel>
 
           <Panel
@@ -273,10 +269,14 @@ export function WorkSection({
           </Panel>
 
           <Panel
-            title="Video series"
-            description="Your teaching episodes for this project. They play on the case study with a click-to-load YouTube player, so nothing heavy loads until someone presses play."
+            title="Images"
+            description="Screenshots, mockups and diagrams. The first image is the card cover and the case-study hero; the rest form the gallery."
           >
-            <VideoManager videos={selected.videos ?? []} onChange={(videos) => patch({ videos })} />
+            <ImageManager
+              images={selected.images ?? []}
+              projectTitle={selected.title}
+              onChange={(images) => patch({ images })}
+            />
           </Panel>
 
           <Panel title="Case study" description="Long-form story shown on the project page. Leave a blank line between paragraphs.">

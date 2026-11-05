@@ -18,6 +18,16 @@ export function SiteSection({ site, onChange }: { site: EditableSite; onChange: 
           <Field label="Founder" value={site.founder} onChange={(founder) => onChange({ founder })} />
           <Field label="Role line" value={site.role} onChange={(role) => onChange({ role })} />
           <Field label="Email" type="email" value={site.email} onChange={(email) => onChange({ email })} />
+          <div className="sm:col-span-2">
+            <Field
+              label="YouTube channel"
+              type="url"
+              value={site.youtubeUrl ?? ""}
+              placeholder="https://www.youtube.com/@kiragamikorp"
+              hint="Shown as a Subscribe button on the Learn page. Must be a youtube.com link; anything else is ignored on save."
+              onChange={(youtubeUrl) => onChange({ youtubeUrl })}
+            />
+          </div>
         </div>
       </Panel>
 

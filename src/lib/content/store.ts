@@ -2,7 +2,7 @@ import { getDefaultContent } from "@/lib/content/defaults";
 import { getSql, requireSql } from "@/lib/db";
 import { isMediaId, pruneOrphanMedia } from "@/lib/media";
 import type { EditableSite, SiteContent, SiteContentRecord } from "@/types/content";
-import { MAX_VIDEOS_PER_PROJECT, parseYouTubeId } from "@/lib/video";
+import { MAX_VIDEOS_PER_PROJECT, isYouTubeUrl, parseYouTubeId } from "@/lib/video";
 import type { AiAnalysis, Project, ProjectCategory, ProjectImage, ProjectVideo, Stat } from "@/types";
 
 const CATEGORIES: readonly ProjectCategory[] = ["Mobile", "Web", "AI & Automation"];
@@ -39,8 +39,10 @@ function normalizeSite(raw: unknown): EditableSite {
   const disciplinesRaw = Array.isArray(data.disciplines) ? data.disciplines : defaults.disciplines;
   const lines = (value: unknown, fallback: string[]) =>
     asStringArray(value).length ? asStringArray(value) : fallback;
+  const youtubeUrl = asUrl(data.youtubeUrl);
 
   return {
+    ...(youtubeUrl && isYouTubeUrl(youtubeUrl) ? { youtubeUrl: youtubeUrl.slice(0, 200) } : {}),
     name: asString(data.name, defaults.name),
     founder: asString(data.founder, defaults.founder),
     role: asString(data.role, defaults.role),

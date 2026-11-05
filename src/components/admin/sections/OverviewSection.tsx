@@ -64,13 +64,14 @@ export function OverviewSection({
           {(
             [
               ["work", "Edit selected work"],
+              ["work", "Upload tutorial videos"],
               ["studio", "Studio controls"],
               ["security", "Security"],
               ["system", "System health"],
             ] as const
           ).map(([id, label]) => (
             <button
-              key={id}
+              key={label}
               type="button"
               onClick={() => onNavigate(id)}
               className="inline-flex items-center gap-2 border-2 border-paper/30 px-4 py-2 font-mono text-[10px] uppercase tracking-[0.2em] text-paper transition-colors hover:border-acid hover:bg-acid hover:text-ink"
