@@ -107,6 +107,8 @@ There is **no public login link**. Entry is hidden behind the hero samurai mark:
 
 Content edits share one **Save & publish** bar (Ctrl+S). Images are resized to 2000px WebP in the browser, stored in `media_assets`, and served from `/api/media/<id>`. Each published project gets a case-study page at `/work/<id>`.
 
+For strong case-study galleries, upload 3–5 purposeful images per project: a clear cover, one full-page or full-screen view, one close-up of the core interaction, and one responsive/mobile state. For Reines, use screenshots from the live site (home, services, featured projects and mobile); do not use stock mockups that imply features which were not built.
+
 ### Teaching series and AI analysis
 
 Every project can teach as well as show off. In the project editor:
